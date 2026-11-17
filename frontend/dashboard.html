@@ -1,0 +1,4518 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Plagiarism Detection - Dashboard</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- SheetJS -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+
+        body {
+            background: #f4f7fb;
+            font-family: Arial, sans-serif;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .dashboard-title {
+            font-weight: bold;
+            color: #212529;
+        }
+
+        .stat-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+        }
+
+        .chart-card,
+        .table-card,
+        .analytics-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .table th {
+            white-space: nowrap;
+        }
+
+        .badge-high {
+            background: #dc3545;
+        }
+
+        .badge-medium {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .badge-low {
+            background: #198754;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .error-box {
+            display: none;
+        }
+
+        .empty-box {
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+        }
+
+        .analytics-number {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .trend-summary {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .user-badge {
+            background: white;
+            color: #212529;
+            border-radius: 20px;
+            padding: 7px 14px;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .analytics-mini {
+            border-radius: 12px;
+            background: #f8f9fa;
+            padding: 18px;
+            height: 100%;
+        }
+
+        .progress {
+            height: 9px;
+            border-radius: 10px;
+        }
+
+        .history-row {
+            border-left: 4px solid #0d6efd;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+        }
+
+        .comparison-select {
+            min-width: 220px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+
+    <div class="container">
+
+        <a
+            class="navbar-brand"
+            href="dashboard.html">
+
+            <i class="bi bi-shield-check"></i>
+            Plagiarism Detection
+
+        </a>
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarMenu">
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+        <div
+            class="collapse navbar-collapse"
+            id="navbarMenu">
+
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+
+                <li class="nav-item">
+                    <a
+                        class="nav-link active"
+                        href="dashboard.html">
+                        Dashboard
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                        class="nav-link"
+                        href="upload.html">
+                        Check Plagiarism
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                        class="nav-link"
+                        href="index.html">
+                        Home
+                    </a>
+                </li>
+
+                <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+
+                    <span class="user-badge">
+
+                        <i class="bi bi-person-circle"></i>
+
+                        <span id="usernameDisplay">
+                            Admin
+                        </span>
+
+                    </span>
+
+                </li>
+
+                <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+
+                    <button
+                        class="btn btn-light btn-sm"
+                        onclick="logout()">
+
+                        <i class="bi bi-box-arrow-right"></i>
+                        Logout
+
+                    </button>
+
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<div class="container py-4">
+
+    <!-- TITLE -->
+
+    <div
+        class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+
+        <div>
+
+            <h2 class="dashboard-title">
+
+                <i class="bi bi-speedometer2"></i>
+                Dashboard
+
+            </h2>
+
+            <p class="text-muted mb-0">
+
+                Overall plagiarism detection analytics and reports
+
+            </p>
+
+        </div>
+
+        <div class="mt-3 mt-md-0">
+
+            <button
+                class="btn btn-primary me-2"
+                onclick="loadReports()">
+
+                <i class="bi bi-arrow-clockwise"></i>
+                Refresh
+
+            </button>
+
+            <a
+                href="upload.html"
+                class="btn btn-success">
+
+                <i class="bi bi-file-earmark-plus"></i>
+                Check New Document
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ERROR -->
+
+    <div
+        id="errorBox"
+        class="alert alert-danger error-box">
+
+        <i class="bi bi-exclamation-triangle"></i>
+
+        <span id="errorMessage"></span>
+
+    </div>
+
+
+    <!-- =================================================
+         STAT CARDS
+    ================================================= -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card stat-card h-100">
+
+                <div class="card-body d-flex align-items-center">
+
+                    <div
+                        class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
+
+                        <i class="bi bi-files"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="text-muted">
+                            Total Documents
+                        </div>
+
+                        <div
+                            id="totalDocuments"
+                            class="analytics-number">
+
+                            0
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card stat-card h-100">
+
+                <div class="card-body d-flex align-items-center">
+
+                    <div
+                        class="stat-icon bg-warning bg-opacity-10 text-warning me-3">
+
+                        <i class="bi bi-percent"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="text-muted">
+                            Average Similarity
+                        </div>
+
+                        <div
+                            id="averageSimilarity"
+                            class="analytics-number">
+
+                            0%
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card stat-card h-100">
+
+                <div class="card-body d-flex align-items-center">
+
+                    <div
+                        class="stat-icon bg-danger bg-opacity-10 text-danger me-3">
+
+                        <i class="bi bi-exclamation-octagon"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="text-muted">
+                            High Plagiarism
+                        </div>
+
+                        <div
+                            id="highCount"
+                            class="analytics-number">
+
+                            0
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card stat-card h-100">
+
+                <div class="card-body d-flex align-items-center">
+
+                    <div
+                        class="stat-icon bg-success bg-opacity-10 text-success me-3">
+
+                        <i class="bi bi-check-circle"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="text-muted">
+                            Low Plagiarism
+                        </div>
+
+                        <div
+                            id="lowCount"
+                            class="analytics-number">
+
+                            0
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         SECOND ANALYTICS
+    ================================================= -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="card stat-card">
+
+                <div class="card-body">
+
+                    <div class="text-muted mb-1">
+                        <i class="bi bi-dash-circle"></i>
+                        Medium Plagiarism
+                    </div>
+
+                    <div
+                        id="mediumCount"
+                        class="analytics-number text-warning">
+
+                        0
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="card stat-card">
+
+                <div class="card-body">
+
+                    <div class="text-muted mb-1">
+                        <i class="bi bi-bar-chart"></i>
+                        Highest Similarity
+                    </div>
+
+                    <div
+                        id="highestSimilarity"
+                        class="analytics-number text-danger">
+
+                        0%
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="card stat-card">
+
+                <div class="card-body">
+
+                    <div class="text-muted mb-1">
+                        <i class="bi bi-graph-up"></i>
+                        Latest Check
+                    </div>
+
+                    <div
+                        id="latestCheck"
+                        class="fw-bold fs-5">
+
+                        No data
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         ADVANCED ANALYTICS
+    ================================================= -->
+
+    <div class="card analytics-card mb-4">
+
+        <div class="card-body">
+
+            <div class="d-flex align-items-center mb-4">
+
+                <div
+                    class="stat-icon bg-info bg-opacity-10 text-info me-3">
+
+                    <i class="bi bi-bar-chart-line-fill"></i>
+
+                </div>
+
+                <div>
+
+                    <h4 class="fw-bold mb-1">
+                        Advanced Analytics & Statistics
+                    </h4>
+
+                    <p class="text-muted mb-0">
+                        Detailed analysis of plagiarism detection results
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="row g-3 mb-4">
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Average Original Content
+                        </div>
+
+                        <div
+                            id="averageOriginal"
+                            class="analytics-number text-success">
+
+                            0%
+
+                        </div>
+
+                        <div class="progress mt-2">
+
+                            <div
+                                id="originalProgress"
+                                class="progress-bar bg-success"
+                                style="width:0%">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            High Plagiarism %
+                        </div>
+
+                        <div
+                            id="highPercentage"
+                            class="analytics-number text-danger">
+
+                            0%
+
+                        </div>
+
+                        <div class="progress mt-2">
+
+                            <div
+                                id="highProgress"
+                                class="progress-bar bg-danger"
+                                style="width:0%">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Medium Plagiarism %
+                        </div>
+
+                        <div
+                            id="mediumPercentage"
+                            class="analytics-number text-warning">
+
+                            0%
+
+                        </div>
+
+                        <div class="progress mt-2">
+
+                            <div
+                                id="mediumProgress"
+                                class="progress-bar bg-warning"
+                                style="width:0%">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Low Plagiarism %
+                        </div>
+
+                        <div
+                            id="lowPercentage"
+                            class="analytics-number text-success">
+
+                            0%
+
+                        </div>
+
+                        <div class="progress mt-2">
+
+                            <div
+                                id="lowProgress"
+                                class="progress-bar bg-success"
+                                style="width:0%">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="row g-3">
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Highest Similarity Document
+                        </div>
+
+                        <strong id="highestDocument">
+                            No data
+                        </strong>
+
+                        <div
+                            id="highestDocumentValue"
+                            class="text-danger fw-bold">
+
+                            0%
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Lowest Similarity Document
+                        </div>
+
+                        <strong id="lowestDocument">
+                            No data
+                        </strong>
+
+                        <div
+                            id="lowestDocumentValue"
+                            class="text-success fw-bold">
+
+                            0%
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Documents With Matching Text
+                        </div>
+
+                        <div
+                            id="matchingDocuments"
+                            class="analytics-number text-primary">
+
+                            0
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Documents With No Matching Text
+                        </div>
+
+                        <div
+                            id="originalDocuments"
+                            class="analytics-number text-success">
+
+                            0
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="alert alert-light border mt-4 mb-0">
+
+                <strong>Analytics Summary:</strong>
+
+                <span id="analyticsSummary">
+                    No plagiarism reports available yet.
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         PLAGIARISM TRENDS & HISTORY
+    ================================================= -->
+
+    <div class="card analytics-card mb-4">
+
+        <div class="card-body">
+
+            <div
+                class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-3">
+
+                <div>
+
+                    <h4 class="fw-bold mb-1">
+
+                        <i class="bi bi-clock-history"></i>
+
+                        Plagiarism Trends & History
+
+                    </h4>
+
+                    <p class="text-muted mb-0">
+
+                        Track recent checks and similarity changes over time
+
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="btn-group mt-3 mt-lg-0"
+                    role="group">
+
+                    <button
+                        class="btn btn-outline-primary active"
+                        onclick="setHistoryRange(0,this)">
+
+                        All
+
+                    </button>
+
+                    <button
+                        class="btn btn-outline-primary"
+                        onclick="setHistoryRange(7,this)">
+
+                        7 Days
+
+                    </button>
+
+                    <button
+                        class="btn btn-outline-primary"
+                        onclick="setHistoryRange(30,this)">
+
+                        30 Days
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="row g-3 mb-4">
+
+                <div class="col-md-3">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Trend Status
+                        </div>
+
+                        <div
+                            id="trendStatus"
+                            class="analytics-number text-primary">
+
+                            No data
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Checks Today
+                        </div>
+
+                        <div
+                            id="checksToday"
+                            class="analytics-number">
+
+                            0
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Checks This Week
+                        </div>
+
+                        <div
+                            id="checksWeek"
+                            class="analytics-number">
+
+                            0
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Period Average
+                        </div>
+
+                        <div
+                            id="periodAverage"
+                            class="analytics-number">
+
+                            0%
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="row g-4">
+
+                <div class="col-lg-8">
+
+                    <div style="height:320px;">
+
+                        <canvas id="historyTrendChart"></canvas>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-lg-4">
+
+                    <h6 class="fw-bold mb-3">
+                        Recent Activity
+                    </h6>
+
+                    <div id="recentHistory"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         DOCUMENT HISTORY
+    ================================================= -->
+
+    <div
+        class="card analytics-card mb-4"
+        id="documentHistorySection">
+
+        <div class="card-body">
+
+            <div
+                class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-3">
+
+                <div>
+
+                    <h4 class="fw-bold mb-1">
+
+                        <i class="bi bi-journal-text"></i>
+
+                        Document History
+
+                    </h4>
+
+                    <p class="text-muted mb-0">
+
+                        Complete history of documents checked by the plagiarism detection system
+
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="btn btn-outline-primary mt-3 mt-lg-0"
+                    onclick="renderDocumentHistory()">
+
+                    <i class="bi bi-arrow-clockwise"></i>
+
+                    Refresh History
+
+                </button>
+
+            </div>
+
+
+            <div class="row g-3 mb-3">
+
+                <div class="col-md-4">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Total Checked Documents
+                        </div>
+
+                        <div
+                            id="historyTotalDocuments"
+                            class="analytics-number text-primary">
+
+                            0
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Latest Document
+                        </div>
+
+                        <div
+                            id="historyLatestDocument"
+                            class="fw-bold fs-6">
+
+                            No data
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <div class="analytics-mini">
+
+                        <div class="text-muted">
+                            Latest Check Time
+                        </div>
+
+                        <div
+                            id="historyLatestTime"
+                            class="fw-bold fs-6">
+
+                            No data
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>#</th>
+                            <th>Document Name</th>
+                            <th>Matched Document</th>
+                            <th>Similarity</th>
+                            <th>Level</th>
+                            <th>Checked On</th>
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="documentHistoryBody">
+
+                        <tr>
+
+                            <td
+                                colspan="7"
+                                class="text-center text-muted py-4">
+
+                                No document history available.
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         CHARTS
+    ================================================= -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-8">
+
+            <div class="card chart-card h-100">
+
+                <div class="card-body">
+
+                    <h5 class="card-title fw-bold">
+
+                        <i class="bi bi-graph-up-arrow"></i>
+
+                        Plagiarism Trend
+
+                    </h5>
+
+                    <p class="trend-summary">
+
+                        Similarity percentage for checked documents
+
+                    </p>
+
+                    <div style="height:350px;">
+
+                        <canvas id="trendChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4">
+
+            <div class="card chart-card h-100">
+
+                <div class="card-body">
+
+                    <h5 class="card-title fw-bold">
+
+                        <i class="bi bi-pie-chart"></i>
+
+                        Plagiarism Distribution
+
+                    </h5>
+
+                    <p class="trend-summary">
+
+                        High, medium and low plagiarism reports
+
+                    </p>
+
+                    <div style="height:350px;">
+
+                        <canvas id="riskChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- BAR CHART -->
+
+    <div class="row mb-4">
+
+        <div class="col-12">
+
+            <div class="card chart-card">
+
+                <div class="card-body">
+
+                    <h5 class="card-title fw-bold">
+
+                        <i class="bi bi-bar-chart-fill"></i>
+
+                        Similarity Comparison
+
+                    </h5>
+
+                    <p class="trend-summary">
+
+                        Similarity percentage of recently checked documents
+
+                    </p>
+
+                    <div style="height:350px;">
+
+                        <canvas id="comparisonChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         DOCUMENT COMPARISON
+    ================================================= -->
+
+    <div
+        class="card comparison-card mb-4"
+        style="border:none;border-radius:15px;box-shadow:0 4px 15px rgba(0,0,0,0.08);">
+
+        <div class="card-body">
+
+            <h5 class="fw-bold">
+
+                <i class="bi bi-files"></i>
+
+                Document Comparison
+
+            </h5>
+
+            <p class="text-muted">
+
+                Select two reports to compare their plagiarism results.
+
+            </p>
+
+            <div class="row g-2 align-items-center">
+
+                <div class="col-lg-5">
+
+                    <select
+                        id="compareDocument1"
+                        class="form-select comparison-select">
+
+                        <option value="">
+                            Select first document
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-lg-5">
+
+                    <select
+                        id="compareDocument2"
+                        class="form-select comparison-select">
+
+                        <option value="">
+                            Select second document
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-lg-2">
+
+                    <button
+                        class="btn btn-primary w-100"
+                        onclick="compareSelectedDocuments()">
+
+                        <i class="bi bi-arrow-left-right"></i>
+
+                        Compare
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         REPORT TABLE
+    ================================================= -->
+
+    <div class="card table-card">
+
+        <div class="card-body">
+
+            <div
+                class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-3">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+
+                        <i class="bi bi-table"></i>
+
+                        Plagiarism Reports
+
+                    </h5>
+
+                    <p class="text-muted mb-0">
+
+                        All documents checked by the system
+
+                    </p>
+
+                </div>
+
+
+                <div class="mt-3 mt-lg-0">
+
+                    <button
+                        class="btn btn-outline-success me-2"
+                        onclick="downloadExcel()">
+
+                        <i class="bi bi-file-earmark-excel"></i>
+
+                        Download Excel
+
+                    </button>
+
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        onclick="downloadCSV()">
+
+                        <i class="bi bi-filetype-csv"></i>
+
+                        Download CSV
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- SEARCH -->
+
+            <div class="row g-2 mb-3">
+
+                <div class="col-md-8">
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        class="form-control"
+                        placeholder="Search document or matched document..."
+                        onkeyup="filterReports()">
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <select
+                        id="levelFilter"
+                        class="form-select"
+                        onchange="filterReports()">
+
+                        <option value="All">
+                            All Levels
+                        </option>
+
+                        <option value="High">
+                            High
+                        </option>
+
+                        <option value="Medium">
+                            Medium
+                        </option>
+
+                        <option value="Low">
+                            Low
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <!-- TABLE -->
+
+            <div class="table-responsive">
+
+                <table
+                    class="table table-hover align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>#</th>
+                            <th>Document</th>
+                            <th>Matched Document</th>
+                            <th>Similarity</th>
+                            <th>Level</th>
+                            <th>Checked On</th>
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="reportsTableBody"></tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- LOADING -->
+
+            <div
+                id="loadingBox"
+                class="loading">
+
+                <div
+                    class="spinner-border text-primary"
+                    role="status">
+                </div>
+
+                <p class="mt-2">
+                    Loading reports...
+                </p>
+
+            </div>
+
+
+            <!-- EMPTY -->
+
+            <div
+                id="emptyBox"
+                class="empty-box"
+                style="display:none;">
+
+                <i
+                    class="bi bi-file-earmark-x"
+                    style="font-size:50px;">
+                </i>
+
+                <h5 class="mt-3">
+
+                    No Plagiarism Reports Available
+
+                </h5>
+
+                <p>
+
+                    No plagiarism reports are available yet.
+
+                </p>
+
+                <a
+                    href="upload.html"
+                    class="btn btn-primary">
+
+                    Check Your First Document
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+const API_URL =
+    "http://localhost:8080/api/plagiarism/reports";
+
+let allReports = [];
+
+let trendChart = null;
+let riskChart = null;
+let comparisonChart = null;
+
+let historyRange = 0;
+let historyTrendChart = null;
+
+
+/* =====================================================
+   LOGIN PROTECTION
+===================================================== */
+
+if (
+    localStorage.getItem("plagiarismLoggedIn")
+    !== "true"
+) {
+
+    window.location.href =
+        "login.html";
+
+}
+
+
+/* =====================================================
+   USERNAME
+===================================================== */
+
+const savedUsername =
+    localStorage.getItem(
+        "plagiarismUsername"
+    );
+
+if (savedUsername) {
+
+    document.getElementById(
+        "usernameDisplay"
+    ).textContent =
+        savedUsername;
+
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+function logout() {
+
+    localStorage.removeItem(
+        "plagiarismLoggedIn"
+    );
+
+    localStorage.removeItem(
+        "plagiarismUsername"
+    );
+
+    sessionStorage.clear();
+
+    window.location.replace(
+        "login.html"
+    );
+
+}
+
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+function escapeHtml(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+    return String(value)
+
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* =====================================================
+   GET LEVEL
+===================================================== */
+
+function getLevel(report) {
+
+    if (
+        report.plagiarismLevel
+    ) {
+
+        return report.plagiarismLevel
+            .trim()
+            .toLowerCase();
+
+    }
+
+    const similarity =
+        Number(
+            report.similarityPercentage || 0
+        );
+
+    if (similarity >= 70) {
+
+        return "high";
+
+    }
+
+    if (similarity >= 30) {
+
+        return "medium";
+
+    }
+
+    return "low";
+
+}
+
+
+/* =====================================================
+   LOAD REPORTS
+===================================================== */
+
+async function loadReports() {
+
+    document.getElementById(
+        "loadingBox"
+    ).style.display =
+        "block";
+
+    document.getElementById(
+        "emptyBox"
+    ).style.display =
+        "none";
+
+    document.getElementById(
+        "errorBox"
+    ).style.display =
+        "none";
+
+    try {
+
+        const response =
+            await fetch(API_URL);
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to load reports."
+            );
+
+        }
+
+        allReports =
+            await response.json();
+
+        if (
+            !Array.isArray(
+                allReports
+            )
+        ) {
+
+            allReports = [];
+
+        }
+
+        updateAnalytics();
+
+        displayReports(
+            allReports
+        );
+
+        createCharts(
+            allReports
+        );
+
+        updateAdvancedAnalytics();
+
+        updateHistoryAnalytics();
+
+        renderDocumentHistory();
+
+        populateComparisonSelectors();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        document.getElementById(
+            "errorBox"
+        ).style.display =
+            "block";
+
+        document.getElementById(
+            "errorMessage"
+        ).textContent =
+            "Backend connection failed. Make sure Spring Boot is running on port 8080.";
+
+    }
+
+    finally {
+
+        document.getElementById(
+            "loadingBox"
+        ).style.display =
+            "none";
+
+    }
+
+}
+
+
+/* =====================================================
+   UPDATE ANALYTICS
+===================================================== */
+
+function updateAnalytics() {
+
+    const total =
+        allReports.length;
+
+    document.getElementById(
+        "totalDocuments"
+    ).textContent =
+        total;
+
+    if (total === 0) {
+
+        document.getElementById(
+            "averageSimilarity"
+        ).textContent =
+            "0%";
+
+        document.getElementById(
+            "highCount"
+        ).textContent =
+            "0";
+
+        document.getElementById(
+            "mediumCount"
+        ).textContent =
+            "0";
+
+        document.getElementById(
+            "lowCount"
+        ).textContent =
+            "0";
+
+        document.getElementById(
+            "highestSimilarity"
+        ).textContent =
+            "0%";
+
+        document.getElementById(
+            "latestCheck"
+        ).textContent =
+            "No data";
+
+        return;
+
+    }
+
+    let totalSimilarity = 0;
+
+    let highest = 0;
+
+    let high = 0;
+    let medium = 0;
+    let low = 0;
+
+    allReports.forEach(
+        report => {
+
+            const similarity =
+                Number(
+                    report.similarityPercentage || 0
+                );
+
+            totalSimilarity +=
+                similarity;
+
+            if (
+                similarity > highest
+            ) {
+
+                highest =
+                    similarity;
+
+            }
+
+            const level =
+                getLevel(report);
+
+            if (
+                level === "high"
+            ) {
+
+                high++;
+
+            }
+
+            else if (
+                level === "medium"
+            ) {
+
+                medium++;
+
+            }
+
+            else {
+
+                low++;
+
+            }
+
+        }
+    );
+
+    const average =
+        totalSimilarity / total;
+
+    document.getElementById(
+        "averageSimilarity"
+    ).textContent =
+        average.toFixed(1) + "%";
+
+    document.getElementById(
+        "highCount"
+    ).textContent =
+        high;
+
+    document.getElementById(
+        "mediumCount"
+    ).textContent =
+        medium;
+
+    document.getElementById(
+        "lowCount"
+    ).textContent =
+        low;
+
+    document.getElementById(
+        "highestSimilarity"
+    ).textContent =
+        highest.toFixed(1) + "%";
+
+    const sorted =
+        [...allReports].sort(
+            (a,b) =>
+                new Date(
+                    b.checkedAt || 0
+                ) -
+                new Date(
+                    a.checkedAt || 0
+                )
+        );
+
+    if (
+        sorted.length > 0 &&
+        sorted[0].checkedAt
+    ) {
+
+        document.getElementById(
+            "latestCheck"
+        ).textContent =
+            new Date(
+                sorted[0].checkedAt
+            ).toLocaleString();
+
+    }
+
+}
+
+
+/* =====================================================
+   DISPLAY REPORTS
+===================================================== */
+
+function displayReports(
+    reports
+) {
+
+    const tbody =
+        document.getElementById(
+            "reportsTableBody"
+        );
+
+    tbody.innerHTML = "";
+
+    if (
+        !reports ||
+        reports.length === 0
+    ) {
+
+        document.getElementById(
+            "emptyBox"
+        ).style.display =
+            "block";
+
+        return;
+
+    }
+
+    document.getElementById(
+        "emptyBox"
+    ).style.display =
+        "none";
+
+    reports.forEach(
+        (report,index) => {
+
+            const similarity =
+                Number(
+                    report.similarityPercentage || 0
+                );
+
+            const level =
+                getLevel(report);
+
+            let badgeClass =
+                "badge-low";
+
+            if (
+                level === "high"
+            ) {
+
+                badgeClass =
+                    "badge-high";
+
+            }
+
+            else if (
+                level === "medium"
+            ) {
+
+                badgeClass =
+                    "badge-medium";
+
+            }
+
+            const checkedDate =
+                report.checkedAt
+                    ? new Date(
+                        report.checkedAt
+                    ).toLocaleString()
+                    : "N/A";
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+            row.innerHTML = `
+
+                <td>
+                    ${index + 1}
+                </td>
+
+                <td>
+                    <strong>
+                        ${escapeHtml(
+                            report.documentName ||
+                            "Unknown"
+                        )}
+                    </strong>
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        report.matchedDocumentName ||
+                        "No matching document"
+                    )}
+                </td>
+
+                <td>
+                    <strong>
+                        ${similarity.toFixed(1)}%
+                    </strong>
+                </td>
+
+                <td>
+
+                    <span
+                        class="badge ${badgeClass}">
+
+                        ${escapeHtml(
+                            report.plagiarismLevel ||
+                            level
+                        )}
+
+                    </span>
+
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        checkedDate
+                    )}
+                </td>
+
+                <td>
+
+                    <div class="action-buttons">
+
+                        <button
+                            class="btn btn-sm btn-primary"
+                            onclick="viewReport(${report.id})"
+                            title="View Report">
+
+                            <i class="bi bi-eye"></i>
+
+                        </button>
+
+                        <button
+                            class="btn btn-sm btn-danger"
+                            onclick="downloadPDFReport(${report.id})"
+                            title="Download PDF">
+
+                            <i class="bi bi-file-earmark-pdf"></i>
+
+                        </button>
+
+                        <button
+                            class="btn btn-sm btn-success"
+                            onclick="downloadReport(${report.id})"
+                            title="Download TXT">
+
+                            <i class="bi bi-file-text"></i>
+
+                        </button>
+
+                        <button
+                            class="btn btn-sm btn-info text-white"
+                            onclick="openComparison(${report.id})"
+                            title="Compare">
+
+                            <i class="bi bi-arrow-left-right"></i>
+
+                        </button>
+
+                        <button
+                            class="btn btn-sm btn-danger"
+                            onclick="deleteReport(${report.id})"
+                            title="Delete Report">
+
+                            <i class="bi bi-trash"></i>
+
+                        </button>
+
+                    </div>
+
+                </td>
+
+            `;
+
+            tbody.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   FILTER REPORTS
+===================================================== */
+
+function filterReports() {
+
+    const search =
+        document.getElementById(
+            "searchInput"
+        )
+        .value
+        .toLowerCase()
+        .trim();
+
+    const level =
+        document.getElementById(
+            "levelFilter"
+        ).value;
+
+    const filtered =
+        allReports.filter(
+            report => {
+
+                const documentName =
+                    (
+                        report.documentName ||
+                        ""
+                    )
+                    .toLowerCase();
+
+                const matchedName =
+                    (
+                        report.matchedDocumentName ||
+                        ""
+                    )
+                    .toLowerCase();
+
+                const reportLevel =
+                    getLevel(report);
+
+                const matchesSearch =
+                    documentName.includes(
+                        search
+                    )
+                    ||
+                    matchedName.includes(
+                        search
+                    );
+
+                const matchesLevel =
+                    level === "All"
+                    ||
+                    reportLevel ===
+                        level.toLowerCase();
+
+                return (
+                    matchesSearch &&
+                    matchesLevel
+                );
+
+            }
+        );
+
+    displayReports(
+        filtered
+    );
+
+}
+
+
+/* =====================================================
+   CREATE CHARTS
+===================================================== */
+
+function createCharts(
+    reports
+) {
+
+    createTrendChart(
+        reports
+    );
+
+    createRiskChart(
+        reports
+    );
+
+    createComparisonChart(
+        reports
+    );
+
+}
+
+
+/* =====================================================
+   TREND CHART
+===================================================== */
+
+function createTrendChart(
+    reports
+) {
+
+    const canvas =
+        document.getElementById(
+            "trendChart"
+        );
+
+    if (!canvas) return;
+
+    if (trendChart) {
+
+        trendChart.destroy();
+
+    }
+
+    const sorted =
+        [...reports].sort(
+            (a,b) =>
+                new Date(
+                    a.checkedAt || 0
+                ) -
+                new Date(
+                    b.checkedAt || 0
+                )
+        );
+
+    const labels =
+        sorted.map(
+            (report,index) =>
+                report.checkedAt
+                    ? new Date(
+                        report.checkedAt
+                    ).toLocaleDateString()
+                    : "Report " +
+                      (index + 1)
+        );
+
+    const values =
+        sorted.map(
+            report =>
+                Number(
+                    report.similarityPercentage ||
+                    0
+                )
+        );
+
+    trendChart =
+        new Chart(
+            canvas,
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: labels,
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Similarity %",
+
+                            data:
+                                values,
+
+                            borderWidth:
+                                3,
+
+                            tension:
+                                0.3,
+
+                            fill:
+                                false,
+
+                            pointRadius:
+                                5
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive:
+                        true,
+
+                    maintainAspectRatio:
+                        false,
+
+                    scales: {
+
+                        y: {
+
+                            beginAtZero:
+                                true,
+
+                            max:
+                                100,
+
+                            title: {
+
+                                display:
+                                    true,
+
+                                text:
+                                    "Similarity Percentage"
+
+                            }
+
+                        },
+
+                        x: {
+
+                            title: {
+
+                                display:
+                                    true,
+
+                                text:
+                                    "Checked Date"
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   RISK PIE CHART
+===================================================== */
+
+function createRiskChart(
+    reports
+) {
+
+    const canvas =
+        document.getElementById(
+            "riskChart"
+        );
+
+    if (!canvas) return;
+
+    if (riskChart) {
+
+        riskChart.destroy();
+
+    }
+
+    let high = 0;
+    let medium = 0;
+    let low = 0;
+
+    reports.forEach(
+        report => {
+
+            const level =
+                getLevel(report);
+
+            if (
+                level === "high"
+            ) {
+
+                high++;
+
+            }
+
+            else if (
+                level === "medium"
+            ) {
+
+                medium++;
+
+            }
+
+            else {
+
+                low++;
+
+            }
+
+        }
+    );
+
+    riskChart =
+        new Chart(
+            canvas,
+            {
+
+                type:
+                    "doughnut",
+
+                data: {
+
+                    labels: [
+                        "High",
+                        "Medium",
+                        "Low"
+                    ],
+
+                    datasets: [
+
+                        {
+
+                            data: [
+                                high,
+                                medium,
+                                low
+                            ],
+
+                            borderWidth:
+                                2
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive:
+                        true,
+
+                    maintainAspectRatio:
+                        false,
+
+                    plugins: {
+
+                        legend: {
+
+                            position:
+                                "bottom"
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   COMPARISON BAR CHART
+===================================================== */
+
+function createComparisonChart(
+    reports
+) {
+
+    const canvas =
+        document.getElementById(
+            "comparisonChart"
+        );
+
+    if (!canvas) return;
+
+    if (comparisonChart) {
+
+        comparisonChart.destroy();
+
+    }
+
+    const latest =
+        [...reports]
+
+            .sort(
+                (a,b) =>
+                    new Date(
+                        b.checkedAt || 0
+                    ) -
+                    new Date(
+                        a.checkedAt || 0
+                    )
+            )
+
+            .slice(
+                0,
+                10
+            )
+
+            .reverse();
+
+    const labels =
+        latest.map(
+            report =>
+                report.documentName ||
+                "Document"
+        );
+
+    const values =
+        latest.map(
+            report =>
+                Number(
+                    report.similarityPercentage ||
+                    0
+                )
+        );
+
+    comparisonChart =
+        new Chart(
+            canvas,
+            {
+
+                type:
+                    "bar",
+
+                data: {
+
+                    labels:
+                        labels,
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Similarity %",
+
+                            data:
+                                values,
+
+                            borderWidth:
+                                1
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive:
+                        true,
+
+                    maintainAspectRatio:
+                        false,
+
+                    scales: {
+
+                        y: {
+
+                            beginAtZero:
+                                true,
+
+                            max:
+                                100,
+
+                            title: {
+
+                                display:
+                                    true,
+
+                                text:
+                                    "Similarity %"
+
+                            }
+
+                        }
+
+                    },
+
+                    plugins: {
+
+                        legend: {
+
+                            display:
+                                false
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   VIEW REPORT
+===================================================== */
+
+function viewReport(
+    id
+) {
+
+    const report =
+        allReports.find(
+            item =>
+                Number(
+                    item.id
+                ) ===
+                Number(id)
+        );
+
+    if (!report) {
+
+        alert(
+            "Report not found."
+        );
+
+        return;
+
+    }
+
+    localStorage.setItem(
+        "latestPlagiarismResult",
+        JSON.stringify(report)
+    );
+
+    window.location.href =
+        "result.html";
+
+}
+
+
+/* =====================================================
+   DOWNLOAD TXT REPORT
+===================================================== */
+
+function downloadReport(
+    id
+) {
+
+    const report =
+        allReports.find(
+            item =>
+                Number(
+                    item.id
+                ) ===
+                Number(id)
+        );
+
+    if (!report) {
+
+        alert(
+            "Report not found."
+        );
+
+        return;
+
+    }
+
+    const similarity =
+        Number(
+            report.similarityPercentage ||
+            0
+        );
+
+    const level =
+        report.plagiarismLevel ||
+        getLevel(report);
+
+    const checkedAt =
+        report.checkedAt
+            ? new Date(
+                report.checkedAt
+            ).toLocaleString()
+            : "N/A";
+
+    const content =
+
+`PLAGIARISM DETECTION REPORT
+========================================
+
+Document Name:
+${report.documentName || "Unknown"}
+
+Matched Document:
+${report.matchedDocumentName || "No matching document"}
+
+Similarity Percentage:
+${similarity.toFixed(2)}%
+
+Original Content:
+${(100 - similarity).toFixed(2)}%
+
+Plagiarism Level:
+${level}
+
+Checked On:
+${checkedAt}
+
+----------------------------------------
+MATCHING TEXT
+----------------------------------------
+
+${report.matchingText || "No matching text found."}
+
+----------------------------------------
+ORIGINAL DOCUMENT TEXT
+----------------------------------------
+
+${report.originalText || "No original text available."}
+
+========================================
+Generated by Plagiarism Detection System
+`;
+
+    const blob =
+        new Blob(
+            [content],
+            {
+                type:
+                    "text/plain;charset=utf-8"
+            }
+        );
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+    link.href =
+        url;
+
+    const safeName =
+        String(
+            report.documentName ||
+            "plagiarism_report"
+        )
+        .replace(
+            /[^a-z0-9-_]/gi,
+            "_"
+        );
+
+    link.download =
+        safeName +
+        "_plagiarism_report.txt";
+
+    document.body.appendChild(
+        link
+    );
+
+    link.click();
+
+    document.body.removeChild(
+        link
+    );
+
+    URL.revokeObjectURL(
+        url
+    );
+
+}
+
+
+/* =====================================================
+   DELETE REPORT
+===================================================== */
+
+async function deleteReport(
+    id
+) {
+
+    const confirmDelete =
+        confirm(
+            "Are you sure you want to delete this report?"
+        );
+
+    if (!confirmDelete) {
+
+        return;
+
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/${id}`,
+                {
+                    method:
+                        "DELETE"
+                }
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Delete failed."
+            );
+
+        }
+
+        alert(
+            "Report deleted successfully!"
+        );
+
+        loadReports();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+        alert(
+            "Unable to delete report."
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   DOWNLOAD CSV
+===================================================== */
+
+function downloadCSV() {
+
+    if (
+        !allReports ||
+        allReports.length === 0
+    ) {
+
+        alert(
+            "No reports available."
+        );
+
+        return;
+
+    }
+
+    let csv =
+        "Document,Matched Document,Similarity,Level,Checked On\n";
+
+    allReports.forEach(
+        report => {
+
+            const documentName =
+                String(
+                    report.documentName ||
+                    ""
+                )
+                .replace(
+                    /"/g,
+                    '""'
+                );
+
+            const matched =
+                String(
+                    report.matchedDocumentName ||
+                    ""
+                )
+                .replace(
+                    /"/g,
+                    '""'
+                );
+
+            const similarity =
+                Number(
+                    report.similarityPercentage ||
+                    0
+                )
+                .toFixed(2);
+
+            const level =
+                String(
+                    report.plagiarismLevel ||
+                    getLevel(report)
+                )
+                .replace(
+                    /"/g,
+                    '""'
+                );
+
+            const checkedAt =
+                report.checkedAt
+                    ? new Date(
+                        report.checkedAt
+                    ).toLocaleString()
+                    : "";
+
+            csv +=
+                `"${documentName}",` +
+                `"${matched}",` +
+                `"${similarity}%",` +
+                `"${level}",` +
+                `"${checkedAt}"\n`;
+
+        }
+    );
+
+    const blob =
+        new Blob(
+            [csv],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+    link.href =
+        url;
+
+    link.download =
+        "plagiarism_reports.csv";
+
+    document.body.appendChild(
+        link
+    );
+
+    link.click();
+
+    document.body.removeChild(
+        link
+    );
+
+    URL.revokeObjectURL(
+        url
+    );
+
+}
+
+
+/* =====================================================
+   DOWNLOAD EXCEL
+===================================================== */
+
+function downloadExcel() {
+
+    if (
+        !allReports ||
+        allReports.length === 0
+    ) {
+
+        alert(
+            "No reports available."
+        );
+
+        return;
+
+    }
+
+    if (!window.XLSX) {
+
+        alert(
+            "Excel library is not loaded."
+        );
+
+        return;
+
+    }
+
+    const excelData =
+        allReports.map(
+            (report,index) => {
+
+                const similarity =
+                    Number(
+                        report.similarityPercentage ||
+                        0
+                    );
+
+                const level =
+                    report.plagiarismLevel ||
+                    getLevel(report);
+
+                const checkedAt =
+                    report.checkedAt
+                        ? new Date(
+                            report.checkedAt
+                        ).toLocaleString()
+                        : "";
+
+                return {
+
+                    "S.No":
+                        index + 1,
+
+                    "Document Name":
+                        report.documentName ||
+                        "Unknown",
+
+                    "Matched Document":
+                        report.matchedDocumentName ||
+                        "No matching document",
+
+                    "Similarity (%)":
+                        Number(
+                            similarity.toFixed(2)
+                        ),
+
+                    "Original Content (%)":
+                        Number(
+                            (100 - similarity)
+                            .toFixed(2)
+                        ),
+
+                    "Plagiarism Level":
+                        level,
+
+                    "Checked On":
+                        checkedAt,
+
+                    "Matching Text":
+                        report.matchingText ||
+                        "No matching text found."
+
+                };
+
+            }
+        );
+
+    try {
+
+        const worksheet =
+            XLSX.utils.json_to_sheet(
+                excelData
+            );
+
+        worksheet["!cols"] = [
+
+            { wch: 8 },
+            { wch: 30 },
+            { wch: 30 },
+            { wch: 18 },
+            { wch: 22 },
+            { wch: 20 },
+            { wch: 25 },
+            { wch: 60 }
+
+        ];
+
+        const workbook =
+            XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(
+            workbook,
+            worksheet,
+            "Plagiarism Reports"
+        );
+
+        XLSX.writeFile(
+            workbook,
+            "plagiarism_reports.xlsx"
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+        alert(
+            "Unable to create Excel file."
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   ADVANCED ANALYTICS
+===================================================== */
+
+function updateAdvancedAnalytics() {
+
+    const total =
+        allReports.length;
+
+    const set =
+        (id,value) => {
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+            if (element) {
+
+                element.textContent =
+                    value;
+
+            }
+
+        };
+
+    const progress =
+        (id,value) => {
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+            if (element) {
+
+                element.style.width =
+                    Math.max(
+                        0,
+                        Math.min(
+                            100,
+                            value
+                        )
+                    ) + "%";
+
+            }
+
+        };
+
+    if (!total) {
+
+        set(
+            "averageOriginal",
+            "0%"
+        );
+
+        set(
+            "highPercentage",
+            "0%"
+        );
+
+        set(
+            "mediumPercentage",
+            "0%"
+        );
+
+        set(
+            "lowPercentage",
+            "0%"
+        );
+
+        set(
+            "highestDocument",
+            "No data"
+        );
+
+        set(
+            "lowestDocument",
+            "No data"
+        );
+
+        set(
+            "highestDocumentValue",
+            "0%"
+        );
+
+        set(
+            "lowestDocumentValue",
+            "0%"
+        );
+
+        set(
+            "matchingDocuments",
+            "0"
+        );
+
+        set(
+            "originalDocuments",
+            "0"
+        );
+
+        set(
+            "analyticsSummary",
+            "No plagiarism reports available yet."
+        );
+
+        [
+            "originalProgress",
+            "highProgress",
+            "mediumProgress",
+            "lowProgress"
+        ]
+        .forEach(
+            id =>
+                progress(
+                    id,
+                    0
+                )
+        );
+
+        return;
+
+    }
+
+    let sum = 0;
+    let high = 0;
+    let medium = 0;
+    let low = 0;
+    let matching = 0;
+
+    allReports.forEach(
+        report => {
+
+            const similarity =
+                Number(
+                    report.similarityPercentage ||
+                    0
+                );
+
+            sum +=
+                similarity;
+
+            const level =
+                getLevel(
+                    report
+                );
+
+            if (
+                level === "high"
+            ) {
+
+                high++;
+
+            }
+
+            else if (
+                level === "medium"
+            ) {
+
+                medium++;
+
+            }
+
+            else {
+
+                low++;
+
+            }
+
+            const matchingText =
+                (
+                    report.matchingText ||
+                    ""
+                )
+                .trim();
+
+            if (
+                matchingText &&
+                !/^no matching text found/i.test(
+                    matchingText
+                )
+            ) {
+
+                matching++;
+
+            }
+
+        }
+    );
+
+    const average =
+        sum / total;
+
+    const original =
+        100 - average;
+
+    const highPct =
+        high /
+        total *
+        100;
+
+    const mediumPct =
+        medium /
+        total *
+        100;
+
+    const lowPct =
+        low /
+        total *
+        100;
+
+    const sorted =
+        [...allReports].sort(
+            (a,b) =>
+                Number(
+                    b.similarityPercentage ||
+                    0
+                ) -
+                Number(
+                    a.similarityPercentage ||
+                    0
+                )
+        );
+
+    const highest =
+        sorted[0];
+
+    const lowest =
+        sorted[
+            sorted.length - 1
+        ];
+
+    set(
+        "averageOriginal",
+        original.toFixed(1) + "%"
+    );
+
+    set(
+        "highPercentage",
+        highPct.toFixed(1) + "%"
+    );
+
+    set(
+        "mediumPercentage",
+        mediumPct.toFixed(1) + "%"
+    );
+
+    set(
+        "lowPercentage",
+        lowPct.toFixed(1) + "%"
+    );
+
+    progress(
+        "originalProgress",
+        original
+    );
+
+    progress(
+        "highProgress",
+        highPct
+    );
+
+    progress(
+        "mediumProgress",
+        mediumPct
+    );
+
+    progress(
+        "lowProgress",
+        lowPct
+    );
+
+    set(
+        "highestDocument",
+        highest?.documentName ||
+        "No data"
+    );
+
+    set(
+        "highestDocumentValue",
+        Number(
+            highest?.similarityPercentage ||
+            0
+        ).toFixed(1) + "%"
+    );
+
+    set(
+        "lowestDocument",
+        lowest?.documentName ||
+        "No data"
+    );
+
+    set(
+        "lowestDocumentValue",
+        Number(
+            lowest?.similarityPercentage ||
+            0
+        ).toFixed(1) + "%"
+    );
+
+    set(
+        "matchingDocuments",
+        matching
+    );
+
+    set(
+        "originalDocuments",
+        total - matching
+    );
+
+    set(
+        "analyticsSummary",
+        `Across ${total} document${total === 1 ? "" : "s"}, the average similarity is ${average.toFixed(1)}%. ${high} high-risk, ${medium} medium-risk and ${low} low-risk report${total === 1 ? "" : "s"} were recorded.`
+    );
+
+}
+
+
+/* =====================================================
+   HISTORY
+===================================================== */
+
+function setHistoryRange(
+    days,
+    button
+) {
+
+    historyRange =
+        days;
+
+    document
+        .querySelectorAll(
+            ".btn-group button"
+        )
+        .forEach(
+            item =>
+                item.classList.remove(
+                    "active"
+                )
+        );
+
+    if (button) {
+
+        button.classList.add(
+            "active"
+        );
+
+    }
+
+    updateHistoryAnalytics();
+
+}
+
+
+function getHistoryReports() {
+
+    if (!historyRange) {
+
+        return [
+            ...allReports
+        ]
+        .sort(
+            (a,b) =>
+                new Date(
+                    a.checkedAt || 0
+                ) -
+                new Date(
+                    b.checkedAt || 0
+                )
+        );
+
+    }
+
+    const cutoff =
+        new Date();
+
+    cutoff.setDate(
+        cutoff.getDate() -
+        historyRange
+    );
+
+    return allReports
+
+        .filter(
+            report =>
+                new Date(
+                    report.checkedAt || 0
+                ) >= cutoff
+        )
+
+        .sort(
+            (a,b) =>
+                new Date(
+                    a.checkedAt || 0
+                ) -
+                new Date(
+                    b.checkedAt || 0
+                )
+        );
+
+}
+
+
+function updateHistoryAnalytics() {
+
+    const reports =
+        getHistoryReports();
+
+    const now =
+        new Date();
+
+    const todayStart =
+        new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate()
+        );
+
+    const weekStart =
+        new Date(now);
+
+    weekStart.setDate(
+        now.getDate() - 7
+    );
+
+    const today =
+        allReports.filter(
+            report =>
+                new Date(
+                    report.checkedAt || 0
+                ) >= todayStart
+        ).length;
+
+    const week =
+        allReports.filter(
+            report =>
+                new Date(
+                    report.checkedAt || 0
+                ) >= weekStart
+        ).length;
+
+    const average =
+        reports.length
+            ? reports.reduce(
+                (sum,report) =>
+                    sum +
+                    Number(
+                        report.similarityPercentage ||
+                        0
+                    ),
+                0
+            ) /
+            reports.length
+            : 0;
+
+    let status =
+        "No data";
+
+    if (
+        reports.length >= 2
+    ) {
+
+        const first =
+            Number(
+                reports[0]
+                    .similarityPercentage ||
+                0
+            );
+
+        const last =
+            Number(
+                reports[
+                    reports.length - 1
+                ]
+                .similarityPercentage ||
+                0
+            );
+
+        const difference =
+            last - first;
+
+        if (
+            Math.abs(
+                difference
+            ) < 3
+        ) {
+
+            status =
+                "Stable";
+
+        }
+
+        else if (
+            difference > 0
+        ) {
+
+            status =
+                "Increasing";
+
+        }
+
+        else {
+
+            status =
+                "Decreasing";
+
+        }
+
+    }
+
+    const set =
+        (id,value) => {
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+            if (element) {
+
+                element.textContent =
+                    value;
+
+            }
+
+        };
+
+    set(
+        "trendStatus",
+        status
+    );
+
+    set(
+        "checksToday",
+        today
+    );
+
+    set(
+        "checksWeek",
+        week
+    );
+
+    set(
+        "periodAverage",
+        average.toFixed(1) +
+        "%"
+    );
+
+    const recent =
+        [
+            ...reports
+        ]
+        .reverse()
+        .slice(
+            0,
+            5
+        );
+
+    const recentBox =
+        document.getElementById(
+            "recentHistory"
+        );
+
+    if (recentBox) {
+
+        recentBox.innerHTML =
+            recent.length
+
+                ? recent.map(
+                    report => {
+
+                        const level =
+                            getLevel(
+                                report
+                            );
+
+                        const badge =
+                            level === "high"
+                                ? "badge-high"
+                                : level === "medium"
+                                    ? "badge-medium"
+                                    : "badge-low";
+
+                        return `
+
+                            <div class="history-row">
+
+                                <div class="fw-bold">
+
+                                    ${escapeHtml(
+                                        report.documentName ||
+                                        "Unknown"
+                                    )}
+
+                                </div>
+
+                                <div class="small text-muted">
+
+                                    ${
+                                        report.checkedAt
+                                            ? new Date(
+                                                report.checkedAt
+                                            ).toLocaleString()
+                                            : "N/A"
+                                    }
+
+                                </div>
+
+                                <span
+                                    class="badge ${badge}">
+
+                                    ${Number(
+                                        report.similarityPercentage ||
+                                        0
+                                    ).toFixed(1)}%
+
+                                </span>
+
+                            </div>
+
+                        `;
+
+                    }
+                ).join("")
+
+                : `
+                    <div class="text-muted">
+                        No recent activity.
+                    </div>
+                `;
+
+    }
+
+    const canvas =
+        document.getElementById(
+            "historyTrendChart"
+        );
+
+    if (historyTrendChart) {
+
+        historyTrendChart.destroy();
+
+    }
+
+    if (canvas) {
+
+        historyTrendChart =
+            new Chart(
+                canvas,
+                {
+
+                    type:
+                        "line",
+
+                    data: {
+
+                        labels:
+                            reports.map(
+                                (report,index) =>
+                                    report.checkedAt
+                                        ? new Date(
+                                            report.checkedAt
+                                        ).toLocaleDateString()
+                                        : "Report " +
+                                          (index + 1)
+                            ),
+
+                        datasets: [
+
+                            {
+
+                                label:
+                                    "Similarity %",
+
+                                data:
+                                    reports.map(
+                                        report =>
+                                            Number(
+                                                report.similarityPercentage ||
+                                                0
+                                            )
+                                    ),
+
+                                borderWidth:
+                                    3,
+
+                                tension:
+                                    0.3,
+
+                                fill:
+                                    false,
+
+                                pointRadius:
+                                    4
+
+                            }
+
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive:
+                            true,
+
+                        maintainAspectRatio:
+                            false,
+
+                        scales: {
+
+                            y: {
+
+                                beginAtZero:
+                                    true,
+
+                                max:
+                                    100
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+    }
+
+}
+
+
+/* =====================================================
+   DOCUMENT HISTORY
+===================================================== */
+
+function renderDocumentHistory() {
+
+    const body =
+        document.getElementById(
+            "documentHistoryBody"
+        );
+
+    const totalElement =
+        document.getElementById(
+            "historyTotalDocuments"
+        );
+
+    const latestDocumentElement =
+        document.getElementById(
+            "historyLatestDocument"
+        );
+
+    const latestTimeElement =
+        document.getElementById(
+            "historyLatestTime"
+        );
+
+    if (!body) {
+
+        return;
+
+    }
+
+    const history =
+        [
+            ...allReports
+        ]
+        .sort(
+            (a,b) =>
+                new Date(
+                    b.checkedAt || 0
+                ) -
+                new Date(
+                    a.checkedAt || 0
+                )
+        );
+
+    if (totalElement) {
+
+        totalElement.textContent =
+            history.length;
+
+    }
+
+    if (
+        history.length === 0
+    ) {
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    class="text-center text-muted py-4">
+
+                    <i
+                        class="bi bi-clock-history fs-3 d-block mb-2">
+                    </i>
+
+                    No document history available yet.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        if (latestDocumentElement) {
+
+            latestDocumentElement.textContent =
+                "No data";
+
+        }
+
+        if (latestTimeElement) {
+
+            latestTimeElement.textContent =
+                "No data";
+
+        }
+
+        return;
+
+    }
+
+    const latest =
+        history[0];
+
+    if (latestDocumentElement) {
+
+        latestDocumentElement.textContent =
+            latest.documentName ||
+            "Unknown document";
+
+    }
+
+    if (latestTimeElement) {
+
+        latestTimeElement.textContent =
+            latest.checkedAt
+                ? new Date(
+                    latest.checkedAt
+                ).toLocaleString()
+                : "N/A";
+
+    }
+
+    body.innerHTML =
+        history.map(
+            (report,index) => {
+
+                const similarity =
+                    Number(
+                        report.similarityPercentage ||
+                        0
+                    );
+
+                const level =
+                    getLevel(
+                        report
+                    );
+
+                const badgeClass =
+                    level === "high"
+                        ? "badge-high"
+                        : level === "medium"
+                            ? "badge-medium"
+                            : "badge-low";
+
+                const checkedAt =
+                    report.checkedAt
+                        ? new Date(
+                            report.checkedAt
+                        ).toLocaleString()
+                        : "N/A";
+
+                return `
+
+                    <tr>
+
+                        <td>
+                            ${index + 1}
+                        </td>
+
+                        <td class="fw-semibold">
+
+                            ${escapeHtml(
+                                report.documentName ||
+                                "Unknown"
+                            )}
+
+                        </td>
+
+                        <td>
+
+                            ${escapeHtml(
+                                report.matchedDocumentName ||
+                                "No matching document"
+                            )}
+
+                        </td>
+
+                        <td>
+
+                            <div class="fw-bold">
+
+                                ${similarity.toFixed(2)}%
+
+                            </div>
+
+                            <div
+                                class="progress mt-1"
+                                style="width:120px;">
+
+                                <div
+                                    class="progress-bar ${
+                                        level === "high"
+                                            ? "bg-danger"
+                                            : level === "medium"
+                                                ? "bg-warning"
+                                                : "bg-success"
+                                    }"
+                                    style="width:${Math.min(
+                                        100,
+                                        Math.max(
+                                            0,
+                                            similarity
+                                        )
+                                    )}%">
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                        <td>
+
+                            <span
+                                class="badge ${badgeClass}">
+
+                                ${escapeHtml(
+                                    level.toUpperCase()
+                                )}
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            ${escapeHtml(
+                                checkedAt
+                            )}
+
+                        </td>
+
+                        <td>
+
+                            <div class="action-buttons">
+
+                                <button
+                                    class="btn btn-sm btn-outline-primary"
+                                    onclick="viewReport(${Number(report.id)})"
+                                    title="View report">
+
+                                    <i class="bi bi-eye"></i>
+
+                                </button>
+
+                                <button
+                                    class="btn btn-sm btn-outline-danger"
+                                    onclick="deleteReport(${Number(report.id)})"
+                                    title="Delete report">
+
+                                    <i class="bi bi-trash"></i>
+
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        )
+        .join("");
+
+}
+
+
+/* =====================================================
+   COMPARISON
+===================================================== */
+
+function populateComparisonSelectors() {
+
+    const ids = [
+        "compareDocument1",
+        "compareDocument2"
+    ];
+
+    ids.forEach(
+        id => {
+
+            const select =
+                document.getElementById(
+                    id
+                );
+
+            if (!select) {
+
+                return;
+
+            }
+
+            select.innerHTML =
+                `
+                    <option value="">
+                        Select document
+                    </option>
+                `;
+
+            allReports.forEach(
+                report => {
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+                    option.value =
+                        report.id;
+
+                    option.textContent =
+                        report.documentName ||
+                        "Document";
+
+                    select.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+function openComparison(
+    id
+) {
+
+    const first =
+        document.getElementById(
+            "compareDocument1"
+        );
+
+    if (first) {
+
+        first.value =
+            String(id);
+
+    }
+
+    const section =
+        document.querySelector(
+            ".comparison-card"
+        );
+
+    if (section) {
+
+        section.scrollIntoView({
+            behavior:
+                "smooth"
+        });
+
+    }
+
+}
+
+
+function compareSelectedDocuments() {
+
+    const first =
+        allReports.find(
+            report =>
+                String(
+                    report.id
+                ) ===
+                String(
+                    document.getElementById(
+                        "compareDocument1"
+                    ).value
+                )
+        );
+
+    const second =
+        allReports.find(
+            report =>
+                String(
+                    report.id
+                ) ===
+                String(
+                    document.getElementById(
+                        "compareDocument2"
+                    ).value
+                )
+        );
+
+    if (
+        !first ||
+        !second
+    ) {
+
+        alert(
+            "Please select two documents."
+        );
+
+        return;
+
+    }
+
+    const firstSimilarity =
+        Number(
+            first.similarityPercentage ||
+            0
+        );
+
+    const secondSimilarity =
+        Number(
+            second.similarityPercentage ||
+            0
+        );
+
+    alert(
+
+`DOCUMENT COMPARISON
+
+${first.documentName || "Document 1"}:
+${firstSimilarity.toFixed(2)}% (${getLevel(first)})
+
+${second.documentName || "Document 2"}:
+${secondSimilarity.toFixed(2)}% (${getLevel(second)})
+
+Difference:
+${Math.abs(
+    firstSimilarity -
+    secondSimilarity
+).toFixed(2)} percentage points`
+
+    );
+
+}
+
+
+/* =====================================================
+   PDF REPORT
+===================================================== */
+
+function downloadPDFReport(
+    id
+) {
+
+    const report =
+        allReports.find(
+            item =>
+                Number(
+                    item.id
+                ) ===
+                Number(id)
+        );
+
+    if (!report) {
+
+        alert(
+            "Report not found."
+        );
+
+        return;
+
+    }
+
+    if (
+        !window.jspdf
+    ) {
+
+        alert(
+            "PDF library is not loaded."
+        );
+
+        return;
+
+    }
+
+    const {
+        jsPDF
+    } =
+        window.jspdf;
+
+    const doc =
+        new jsPDF();
+
+    const similarity =
+        Number(
+            report.similarityPercentage ||
+            0
+        );
+
+    const level =
+        report.plagiarismLevel ||
+        getLevel(report);
+
+    let y =
+        20;
+
+    const addText =
+        (
+            label,
+            text
+        ) => {
+
+            doc.setFont(
+                undefined,
+                "bold"
+            );
+
+            doc.text(
+                label,
+                15,
+                y
+            );
+
+            y += 7;
+
+            doc.setFont(
+                undefined,
+                "normal"
+            );
+
+            const lines =
+                doc.splitTextToSize(
+                    String(
+                        text ||
+                        "N/A"
+                    ),
+                    175
+                );
+
+            doc.text(
+                lines,
+                15,
+                y
+            );
+
+            y +=
+                lines.length *
+                6 +
+                6;
+
+            if (
+                y > 275
+            ) {
+
+                doc.addPage();
+
+                y = 20;
+
+            }
+
+        };
+
+    doc.setFontSize(
+        18
+    );
+
+    doc.text(
+        "PLAGIARISM DETECTION REPORT",
+        15,
+        y
+    );
+
+    y += 12;
+
+    doc.setFontSize(
+        11
+    );
+
+    addText(
+        "Document Name",
+        report.documentName ||
+        "Unknown"
+    );
+
+    addText(
+        "Matched Document",
+        report.matchedDocumentName ||
+        "No matching document"
+    );
+
+    addText(
+        "Similarity Percentage",
+        similarity.toFixed(2) +
+        "%"
+    );
+
+    addText(
+        "Original Content",
+        (100 - similarity).toFixed(2) +
+        "%"
+    );
+
+    addText(
+        "Plagiarism Level",
+        level
+    );
+
+    addText(
+        "Checked On",
+        report.checkedAt
+            ? new Date(
+                report.checkedAt
+            ).toLocaleString()
+            : "N/A"
+    );
+
+    addText(
+        "Matching Text",
+        report.matchingText ||
+        "No matching text found."
+    );
+
+    addText(
+        "Original Text",
+        report.originalText ||
+        "No original text available."
+    );
+
+    const safe =
+        String(
+            report.documentName ||
+            "plagiarism_report"
+        )
+        .replace(
+            /[^a-z0-9-_]/gi,
+            "_"
+        );
+
+    doc.save(
+        safe +
+        "_plagiarism_report.pdf"
+    );
+
+}
+
+
+/* =====================================================
+   PAGE LOAD
+===================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        loadReports();
+
+    }
+);
+
+</script>
+
+
+<!-- Bootstrap JS -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+</body>
+
+</html>

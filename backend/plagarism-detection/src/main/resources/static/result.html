@@ -1,0 +1,2297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Plagiarism Result
+    </title>
+
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+
+    <!-- jsPDF -->
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+    </script>
+
+
+    <style>
+
+        body {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f5f7fa,
+                    #e9eef5
+                );
+
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+        }
+
+
+        .result-container {
+
+            max-width: 1200px;
+
+            margin:
+                40px auto;
+
+            background: white;
+
+            border-radius: 18px;
+
+            padding: 35px;
+
+            box-shadow:
+                0 8px 30px
+                rgba(0,0,0,0.10);
+
+        }
+
+
+        .page-title {
+
+            font-size: 32px;
+
+            font-weight: 700;
+
+            color: #172033;
+
+        }
+
+
+        .subtitle {
+
+            color: #6c757d;
+
+        }
+
+
+        .info-card {
+
+            border-radius: 15px;
+
+            border: none;
+
+            height: 100%;
+
+            box-shadow:
+                0 4px 15px
+                rgba(0,0,0,0.07);
+
+        }
+
+
+        .info-card .icon {
+
+            font-size: 38px;
+
+        }
+
+
+        .info-title {
+
+            color: #6c757d;
+
+            font-size: 14px;
+
+            margin-top: 8px;
+
+        }
+
+
+        .info-value {
+
+            font-size: 22px;
+
+            font-weight: 700;
+
+            word-break: break-word;
+
+        }
+
+
+        .similarity-section {
+
+            margin-top: 35px;
+
+        }
+
+
+        .similarity-title {
+
+            font-size: 24px;
+
+            font-weight: 700;
+
+        }
+
+
+        .progress {
+
+            height: 42px;
+
+            border-radius: 25px;
+
+            background:
+                #e9ecef;
+
+        }
+
+
+        .progress-bar {
+
+            font-size: 20px;
+
+            font-weight: 700;
+
+            border-radius: 25px;
+
+        }
+
+
+        .analysis-card {
+
+            border-radius: 15px;
+
+            padding: 22px;
+
+            height: 100%;
+
+            border: 1px solid #e5e7eb;
+
+            background: #ffffff;
+
+        }
+
+
+        .analysis-number {
+
+            font-size: 30px;
+
+            font-weight: 700;
+
+        }
+
+
+        .analysis-label {
+
+            color: #6c757d;
+
+            font-size: 14px;
+
+        }
+
+
+        .matching-section {
+
+            margin-top: 35px;
+
+        }
+
+
+        .section-title {
+
+            font-size: 27px;
+
+            font-weight: 700;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .matching-box {
+
+            background:
+                #fffbd1;
+
+            border:
+                1px solid #e8d94a;
+
+            border-radius: 15px;
+
+            padding: 25px;
+
+        }
+
+
+        .match-item {
+
+            background: white;
+
+            border-left:
+                5px solid #ffc107;
+
+            border-radius: 10px;
+
+            padding: 18px;
+
+            margin-bottom: 15px;
+
+            box-shadow:
+                0 2px 8px
+                rgba(0,0,0,0.05);
+
+        }
+
+
+        .original-line {
+
+            font-size: 16px;
+
+            line-height: 1.6;
+
+        }
+
+
+        .matched-line {
+
+            font-size: 16px;
+
+            line-height: 1.6;
+
+            color: #806b00;
+
+            margin-top: 7px;
+
+        }
+
+
+        .sentence-score {
+
+            color: #dc3545;
+
+            font-weight: 700;
+
+            margin-top: 8px;
+
+        }
+
+
+        .no-match {
+
+            background: #f8f9fa;
+
+            padding: 20px;
+
+            border-radius: 10px;
+
+            color: #6c757d;
+
+        }
+
+
+        .original-section {
+
+            margin-top: 35px;
+
+        }
+
+
+        .original-text-box {
+
+            background:
+                #f8f9fa;
+
+            border:
+                1px solid #dee2e6;
+
+            border-radius: 15px;
+
+            padding: 25px;
+
+            white-space: pre-wrap;
+
+            word-break: break-word;
+
+            line-height: 1.7;
+
+            font-size: 16px;
+
+        }
+
+
+        .warning-box {
+
+            margin-top: 30px;
+
+            border-radius: 15px;
+
+            padding: 22px;
+
+            font-size: 17px;
+
+            font-weight: 600;
+
+        }
+
+
+        .warning-high {
+
+            background: #ffe0e3;
+
+            color: #842029;
+
+            border:
+                1px solid #f5c2c7;
+
+        }
+
+
+        .warning-medium {
+
+            background: #fff3cd;
+
+            color: #664d03;
+
+            border:
+                1px solid #ffecb5;
+
+        }
+
+
+        .warning-low {
+
+            background: #d1e7dd;
+
+            color: #0f5132;
+
+            border:
+                1px solid #badbcc;
+
+        }
+
+
+        .action-buttons {
+
+            margin-top: 35px;
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 15px;
+
+            flex-wrap: wrap;
+
+        }
+
+
+        .action-buttons .btn {
+
+            padding:
+                12px 22px;
+
+            font-size: 16px;
+
+            border-radius: 8px;
+
+        }
+
+
+        .footer-note {
+
+            text-align: center;
+
+            color: #6c757d;
+
+            margin-top: 30px;
+
+            font-size: 13px;
+
+        }
+
+
+        @media(max-width: 768px) {
+
+            .result-container {
+
+                margin: 15px;
+
+                padding: 20px;
+
+            }
+
+
+            .page-title {
+
+                font-size: 26px;
+
+            }
+
+
+            .section-title {
+
+                font-size: 22px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container-fluid">
+
+    <div class="result-container">
+
+
+        <!-- ==========================================
+             HEADER
+        =========================================== -->
+
+        <div class="text-center mb-4">
+
+            <div
+                style="font-size:55px;"
+            >
+                🔍
+            </div>
+
+            <h1 class="page-title">
+                Plagiarism Detection Result
+            </h1>
+
+            <p class="subtitle">
+                Detailed analysis of your document
+            </p>
+
+        </div>
+
+
+        <!-- ==========================================
+             DOCUMENT INFORMATION
+        =========================================== -->
+
+        <div class="row g-4">
+
+
+            <!-- DOCUMENT -->
+
+            <div class="col-md-4">
+
+                <div class="card info-card">
+
+                    <div class="card-body text-center">
+
+                        <div class="icon">
+                            📄
+                        </div>
+
+                        <div class="info-title">
+                            Document Name
+                        </div>
+
+                        <div
+                            id="documentName"
+                            class="info-value text-primary"
+                        >
+                            -
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- MATCHED DOCUMENT -->
+
+            <div class="col-md-4">
+
+                <div class="card info-card">
+
+                    <div class="card-body text-center">
+
+                        <div class="icon">
+                            🔎
+                        </div>
+
+                        <div class="info-title">
+                            Matched Document
+                        </div>
+
+                        <div
+                            id="matchedDocument"
+                            class="info-value text-warning"
+                        >
+                            -
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- LEVEL -->
+
+            <div class="col-md-4">
+
+                <div class="card info-card">
+
+                    <div class="card-body text-center">
+
+                        <div class="icon">
+                            ⚠️
+                        </div>
+
+                        <div class="info-title">
+                            Plagiarism Level
+                        </div>
+
+                        <div
+                            id="plagiarismLevel"
+                            class="info-value"
+                        >
+                            -
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             SIMILARITY
+        =========================================== -->
+
+        <div class="similarity-section">
+
+            <h2 class="similarity-title">
+                Similarity Percentage
+            </h2>
+
+            <div class="progress mt-3">
+
+                <div
+                    id="similarityBar"
+                    class="progress-bar"
+                    role="progressbar"
+                    style="width:0%"
+                >
+                    0%
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             DETAILED ANALYSIS
+        =========================================== -->
+
+        <div class="mt-4">
+
+            <h2 class="section-title">
+                📊 Detailed Analysis
+            </h2>
+
+
+            <div class="row g-4">
+
+
+                <!-- PLAGIARIZED -->
+
+                <div class="col-md-3">
+
+                    <div class="analysis-card text-center">
+
+                        <div
+                            id="plagiarizedPercentage"
+                            class="analysis-number text-danger"
+                        >
+                            0%
+                        </div>
+
+                        <div class="analysis-label">
+                            Plagiarized Content
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ORIGINAL -->
+
+                <div class="col-md-3">
+
+                    <div class="analysis-card text-center">
+
+                        <div
+                            id="originalPercentage"
+                            class="analysis-number text-success"
+                        >
+                            0%
+                        </div>
+
+                        <div class="analysis-label">
+                            Original Content
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MATCHING SENTENCES -->
+
+                <div class="col-md-3">
+
+                    <div class="analysis-card text-center">
+
+                        <div
+                            id="matchingSentenceCount"
+                            class="analysis-number text-warning"
+                        >
+                            0
+                        </div>
+
+                        <div class="analysis-label">
+                            Matching Sentences
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- TOTAL SENTENCES -->
+
+                <div class="col-md-3">
+
+                    <div class="analysis-card text-center">
+
+                        <div
+                            id="totalSentenceCount"
+                            class="analysis-number text-primary"
+                        >
+                            0
+                        </div>
+
+                        <div class="analysis-label">
+                            Total Sentences
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             WARNING
+        =========================================== -->
+
+        <div
+            id="warningBox"
+            class="warning-box"
+        >
+        </div>
+
+
+        <!-- ==========================================
+             MATCHING TEXT
+        =========================================== -->
+
+        <div class="matching-section">
+
+            <h2 class="section-title">
+                🖍️ Matching Text
+            </h2>
+
+
+            <div class="matching-box">
+
+                <div id="matchingContainer">
+
+                    <div class="no-match">
+                        No matching text found.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             ORIGINAL TEXT
+        =========================================== -->
+
+        <div class="original-section">
+
+            <h2 class="section-title">
+                📄 Original Document Text
+            </h2>
+
+
+            <div
+                id="originalText"
+                class="original-text-box"
+            >
+                No text available.
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             ACTION BUTTONS
+        =========================================== -->
+
+        <div class="action-buttons">
+
+
+            <button
+                class="btn btn-danger"
+                onclick="downloadPDF()"
+            >
+                📄 Download PDF Report
+            </button>
+
+
+            <button
+                class="btn btn-primary"
+                onclick="downloadTXT()"
+            >
+                📄 Download TXT Report
+            </button>
+
+
+            <button
+                class="btn btn-dark"
+                onclick="window.print()"
+            >
+                🖨️ Print Report
+            </button>
+
+
+            <button
+                class="btn btn-secondary"
+                onclick="goDashboard()"
+            >
+                📊 Dashboard
+            </button>
+
+
+            <button
+                class="btn btn-success"
+                onclick="checkAnother()"
+            >
+                🔄 Check Another Document
+            </button>
+
+        </div>
+
+
+        <div class="footer-note">
+
+            Plagiarism Detection System
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+// ==========================================================
+// GET REPORT
+// ==========================================================
+
+const storedReport =
+    localStorage.getItem(
+        "latestPlagiarismResult"
+    );
+
+
+if (!storedReport) {
+
+    alert(
+        "No plagiarism report found."
+    );
+
+    window.location.href =
+        "upload.html";
+
+}
+
+
+let report;
+
+
+try {
+
+    report =
+        JSON.parse(
+            storedReport
+        );
+
+} catch (error) {
+
+    alert(
+        "Unable to load plagiarism report."
+    );
+
+    window.location.href =
+        "upload.html";
+
+}
+
+
+
+// ==========================================================
+// SAFE TEXT
+// ==========================================================
+
+function escapeHTML(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+    return String(value)
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+
+// ==========================================================
+// GET SIMILARITY
+// ==========================================================
+
+const similarity =
+    Math.max(
+        0,
+        Math.min(
+            100,
+            Number(
+                report.similarityPercentage ||
+                0
+            )
+        )
+    );
+
+
+
+// ==========================================================
+// GET LEVEL
+// ==========================================================
+
+let level =
+    report.plagiarismLevel ||
+    "Low";
+
+level =
+    String(level)
+        .trim();
+
+
+
+// ==========================================================
+// DISPLAY BASIC INFORMATION
+// ==========================================================
+
+document.getElementById(
+    "documentName"
+).textContent =
+    report.documentName ||
+    "-";
+
+
+document.getElementById(
+    "matchedDocument"
+).textContent =
+    report.matchedDocumentName ||
+    "No matching document";
+
+
+document.getElementById(
+    "plagiarismLevel"
+).textContent =
+    level;
+
+
+
+// ==========================================================
+// LEVEL COLOR
+// ==========================================================
+
+const levelElement =
+    document.getElementById(
+        "plagiarismLevel"
+    );
+
+
+if (
+    level.toLowerCase() ===
+    "high"
+) {
+
+    levelElement.className =
+        "info-value text-danger";
+
+} else if (
+    level.toLowerCase() ===
+    "medium"
+) {
+
+    levelElement.className =
+        "info-value text-warning";
+
+} else {
+
+    levelElement.className =
+        "info-value text-success";
+
+}
+
+
+
+// ==========================================================
+// SIMILARITY BAR
+// ==========================================================
+
+const similarityBar =
+    document.getElementById(
+        "similarityBar"
+    );
+
+
+similarityBar.style.width =
+    similarity + "%";
+
+
+similarityBar.textContent =
+    similarity.toFixed(2) + "%";
+
+
+if (similarity >= 70) {
+
+    similarityBar.className =
+        "progress-bar bg-danger";
+
+} else if (similarity >= 30) {
+
+    similarityBar.className =
+        "progress-bar bg-warning";
+
+} else {
+
+    similarityBar.className =
+        "progress-bar bg-success";
+
+}
+
+
+
+// ==========================================================
+// ORIGINAL / PLAGIARIZED
+// ==========================================================
+
+const originalPercentage =
+    Math.max(
+        0,
+        100 - similarity
+    );
+
+
+document.getElementById(
+    "plagiarizedPercentage"
+).textContent =
+    similarity.toFixed(2) + "%";
+
+
+document.getElementById(
+    "originalPercentage"
+).textContent =
+    originalPercentage.toFixed(2) + "%";
+
+
+
+// ==========================================================
+// SENTENCE COUNT
+// ==========================================================
+
+function getSentences(text) {
+
+    if (
+        !text ||
+        !String(text).trim()
+    ) {
+
+        return [];
+
+    }
+
+
+    return String(text)
+
+        .replace(
+            /\s+/g,
+            " "
+        )
+
+        .split(
+            /(?<=[.!?])\s+/
+        )
+
+        .map(
+            sentence =>
+                sentence.trim()
+        )
+
+        .filter(
+            sentence =>
+                sentence.length > 0
+        );
+
+}
+
+
+
+const originalText =
+    report.originalText ||
+    "";
+
+
+const originalSentences =
+    getSentences(
+        originalText
+    );
+
+
+document.getElementById(
+    "totalSentenceCount"
+).textContent =
+    originalSentences.length;
+
+
+
+// ==========================================================
+// MATCHING SENTENCE PARSER
+// ==========================================================
+
+function parseMatchingText(
+    matchingText
+) {
+
+    if (
+        !matchingText ||
+        matchingText.includes(
+            "No matching"
+        )
+    ) {
+
+        return [];
+
+    }
+
+
+    const blocks =
+        matchingText
+            .split(
+                /\n\s*\n/
+            );
+
+
+    const results = [];
+
+
+    blocks.forEach(
+        block => {
+
+            const originalMatch =
+                block.match(
+                    /Original:\s*(.*)/i
+                );
+
+
+            const matchedMatch =
+                block.match(
+                    /Matched:\s*(.*)/i
+                );
+
+
+            const scoreMatch =
+                block.match(
+                    /Sentence Similarity:\s*([\d.]+)%/i
+                );
+
+
+            if (
+                originalMatch &&
+                matchedMatch
+            ) {
+
+                results.push({
+
+                    original:
+                        originalMatch[1]
+                            .trim(),
+
+                    matched:
+                        matchedMatch[1]
+                            .trim(),
+
+                    score:
+                        scoreMatch
+                            ? Number(
+                                scoreMatch[1]
+                            )
+                            : 0
+
+                });
+
+            }
+
+        }
+    );
+
+
+    return results;
+
+}
+
+
+
+const matchingText =
+    report.matchingText ||
+    "";
+
+
+const matchingSentences =
+    parseMatchingText(
+        matchingText
+    );
+
+
+document.getElementById(
+    "matchingSentenceCount"
+).textContent =
+    matchingSentences.length;
+
+
+
+// ==========================================================
+// DISPLAY MATCHING SENTENCES
+// ==========================================================
+
+const matchingContainer =
+    document.getElementById(
+        "matchingContainer"
+    );
+
+
+if (
+    matchingSentences.length === 0
+) {
+
+    matchingContainer.innerHTML = `
+
+        <div class="no-match">
+
+            <i class="bi bi-check-circle-fill text-success"></i>
+
+            No significant matching sentences found.
+
+        </div>
+
+    `;
+
+} else {
+
+    matchingContainer.innerHTML = "";
+
+
+    matchingSentences.forEach(
+        (item, index) => {
+
+            let scoreClass =
+                "text-danger";
+
+
+            if (
+                item.score < 30
+            ) {
+
+                scoreClass =
+                    "text-success";
+
+            } else if (
+                item.score < 70
+            ) {
+
+                scoreClass =
+                    "text-warning";
+
+            }
+
+
+            matchingContainer.innerHTML += `
+
+                <div class="match-item">
+
+                    <div class="original-line">
+
+                        <strong>
+                            Original:
+                        </strong>
+
+                        ${escapeHTML(
+                            item.original
+                        )}
+
+                    </div>
+
+
+                    <div class="matched-line">
+
+                        <strong>
+                            Matched:
+                        </strong>
+
+                        ${escapeHTML(
+                            item.matched
+                        )}
+
+                    </div>
+
+
+                    <div
+                        class="sentence-score ${scoreClass}"
+                    >
+
+                        Sentence Similarity:
+                        ${item.score.toFixed(1)}%
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+    );
+
+}
+
+
+
+// ==========================================================
+// ORIGINAL DOCUMENT
+// ==========================================================
+
+document.getElementById(
+    "originalText"
+).textContent =
+    originalText ||
+    "No text available.";
+
+
+
+// ==========================================================
+// WARNING
+// ==========================================================
+
+const warningBox =
+    document.getElementById(
+        "warningBox"
+    );
+
+
+if (similarity >= 70) {
+
+    warningBox.className =
+        "warning-box warning-high";
+
+    warningBox.innerHTML = `
+
+        🚨 <strong>High plagiarism detected.</strong>
+
+        A large portion of this document is similar
+        to previously checked content.
+
+    `;
+
+} else if (similarity >= 30) {
+
+    warningBox.className =
+        "warning-box warning-medium";
+
+    warningBox.innerHTML = `
+
+        ⚠️ <strong>Moderate similarity detected.</strong>
+
+        Some content matches previously checked documents.
+        Please review the highlighted matching sentences.
+
+    `;
+
+} else {
+
+    warningBox.className =
+        "warning-box warning-low";
+
+    warningBox.innerHTML = `
+
+        ✅ <strong>Low similarity detected.</strong>
+
+        Most of the document appears different from
+        previously checked content.
+
+    `;
+
+}
+
+
+
+// ==========================================================
+// CLEAN FILE NAME
+// ==========================================================
+
+function cleanFileName(
+    name
+) {
+
+    return String(
+        name ||
+        "plagiarism-report"
+    )
+
+        .replace(
+            /[\\/:*?"<>|]/g,
+            "_"
+        );
+
+}
+
+
+
+// ==========================================================
+// DOWNLOAD TXT
+// ==========================================================
+
+function downloadTXT() {
+
+    const checkedDate =
+        report.checkedAt
+            ? new Date(
+                report.checkedAt
+            ).toLocaleString()
+            : "-";
+
+
+    let content =
+
+`PLAGIARISM DETECTION REPORT
+
+========================================
+
+Document Name:
+${report.documentName || "-"}
+
+Matched Document:
+${report.matchedDocumentName || "-"}
+
+Similarity Percentage:
+${similarity.toFixed(2)}%
+
+Original Content:
+${originalPercentage.toFixed(2)}%
+
+Plagiarism Level:
+${level}
+
+Checked On:
+${checkedDate}
+
+========================================
+
+DETAILED ANALYSIS
+
+Total Sentences:
+${originalSentences.length}
+
+Matching Sentences:
+${matchingSentences.length}
+
+========================================
+
+MATCHING SENTENCES
+
+`;
+
+
+    if (
+        matchingSentences.length === 0
+    ) {
+
+        content +=
+            "No significant matching sentences found.\n";
+
+    } else {
+
+        matchingSentences.forEach(
+            (item, index) => {
+
+                content +=
+
+`${index + 1}.
+
+Original:
+${item.original}
+
+Matched:
+${item.matched}
+
+Sentence Similarity:
+${item.score.toFixed(1)}%
+
+----------------------------------------
+
+`;
+
+            }
+        );
+
+    }
+
+
+    content +=
+
+`
+ORIGINAL DOCUMENT TEXT
+
+========================================
+
+${originalText}
+
+========================================
+
+Plagiarism Detection System
+`;
+
+
+    const blob =
+        new Blob(
+            [content],
+            {
+                type:
+                    "text/plain;charset=utf-8"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
+
+
+    link.download =
+        cleanFileName(
+            report.documentName
+        ) +
+        "_plagiarism_report.txt";
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    document.body.removeChild(
+        link
+    );
+
+
+    URL.revokeObjectURL(
+        url
+    );
+
+}
+
+
+
+// ==========================================================
+// PDF HELPERS
+// ==========================================================
+
+function addPDFPageNumber(
+    doc
+) {
+
+    const pageCount =
+        doc.internal.getNumberOfPages();
+
+
+    for (
+        let i = 1;
+        i <= pageCount;
+        i++
+    ) {
+
+        doc.setPage(i);
+
+        doc.setFontSize(9);
+
+        doc.setTextColor(
+            120,
+            120,
+            120
+        );
+
+        doc.text(
+            "Page " +
+            i +
+            " of " +
+            pageCount,
+            105,
+            290,
+            {
+                align:
+                    "center"
+            }
+        );
+
+    }
+
+}
+
+
+
+// ==========================================================
+// DOWNLOAD PDF
+// ==========================================================
+
+function downloadPDF() {
+
+    if (
+        !window.jspdf ||
+        !window.jspdf.jsPDF
+    ) {
+
+        alert(
+            "PDF library is not loaded. Please check your internet connection."
+        );
+
+        return;
+
+    }
+
+
+    const {
+        jsPDF
+    } =
+        window.jspdf;
+
+
+    const doc =
+        new jsPDF();
+
+
+    let y = 20;
+
+
+    // ------------------------------------------------------
+    // HEADER
+    // ------------------------------------------------------
+
+    doc.setFontSize(20);
+
+    doc.setFont(
+        "helvetica",
+        "bold"
+    );
+
+    doc.text(
+        "PLAGIARISM DETECTION REPORT",
+        105,
+        y,
+        {
+            align:
+                "center"
+        }
+    );
+
+
+    y += 15;
+
+
+    doc.setFontSize(10);
+
+    doc.setFont(
+        "helvetica",
+        "normal"
+    );
+
+
+    doc.text(
+        "Generated by Plagiarism Detection System",
+        105,
+        y,
+        {
+            align:
+                "center"
+        }
+    );
+
+
+    y += 15;
+
+
+    // ------------------------------------------------------
+    // DOCUMENT DETAILS
+    // ------------------------------------------------------
+
+    doc.setFontSize(13);
+
+    doc.setFont(
+        "helvetica",
+        "bold"
+    );
+
+
+    doc.text(
+        "Document Details",
+        15,
+        y
+    );
+
+
+    y += 9;
+
+
+    doc.setFontSize(11);
+
+    doc.setFont(
+        "helvetica",
+        "normal"
+    );
+
+
+    const details = [
+
+        [
+            "Document Name",
+            report.documentName || "-"
+        ],
+
+        [
+            "Matched Document",
+            report.matchedDocumentName ||
+                "No matching document"
+        ],
+
+        [
+            "Similarity",
+            similarity.toFixed(2) + "%"
+        ],
+
+        [
+            "Original Content",
+            originalPercentage.toFixed(2) + "%"
+        ],
+
+        [
+            "Plagiarism Level",
+            level
+        ],
+
+        [
+            "Total Sentences",
+            String(
+                originalSentences.length
+            )
+        ],
+
+        [
+            "Matching Sentences",
+            String(
+                matchingSentences.length
+            )
+        ],
+
+        [
+            "Checked On",
+            report.checkedAt
+                ? new Date(
+                    report.checkedAt
+                ).toLocaleString()
+                : "-"
+        ]
+
+    ];
+
+
+    details.forEach(
+        row => {
+
+            doc.setFont(
+                "helvetica",
+                "bold"
+            );
+
+            doc.text(
+                row[0] + ":",
+                15,
+                y
+            );
+
+
+            doc.setFont(
+                "helvetica",
+                "normal"
+            );
+
+
+            const wrapped =
+                doc.splitTextToSize(
+                    String(row[1]),
+                    120
+                );
+
+
+            doc.text(
+                wrapped,
+                65,
+                y
+            );
+
+
+            y +=
+                Math.max(
+                    7,
+                    wrapped.length * 6
+                );
+
+
+            if (
+                y > 270
+            ) {
+
+                doc.addPage();
+
+                y = 20;
+
+            }
+
+        }
+    );
+
+
+
+    // ------------------------------------------------------
+    // DETAILED ANALYSIS
+    // ------------------------------------------------------
+
+    y += 5;
+
+
+    if (
+        y > 265
+    ) {
+
+        doc.addPage();
+
+        y = 20;
+
+    }
+
+
+    doc.setFontSize(13);
+
+    doc.setFont(
+        "helvetica",
+        "bold"
+    );
+
+
+    doc.text(
+        "Detailed Analysis",
+        15,
+        y
+    );
+
+
+    y += 10;
+
+
+    doc.setFontSize(11);
+
+    doc.setFont(
+        "helvetica",
+        "normal"
+    );
+
+
+    const analysisText = [
+
+        "Similarity Percentage: " +
+            similarity.toFixed(2) +
+            "%",
+
+        "Original Percentage: " +
+            originalPercentage.toFixed(2) +
+            "%",
+
+        "Matching Sentences: " +
+            matchingSentences.length,
+
+        "Total Sentences: " +
+            originalSentences.length
+
+    ];
+
+
+    analysisText.forEach(
+        text => {
+
+            doc.text(
+                text,
+                20,
+                y
+            );
+
+            y += 7;
+
+        }
+    );
+
+
+
+    // ------------------------------------------------------
+    // MATCHING SENTENCES
+    // ------------------------------------------------------
+
+    y += 5;
+
+
+    if (
+        y > 260
+    ) {
+
+        doc.addPage();
+
+        y = 20;
+
+    }
+
+
+    doc.setFontSize(13);
+
+    doc.setFont(
+        "helvetica",
+        "bold"
+    );
+
+
+    doc.text(
+        "Matching Sentences",
+        15,
+        y
+    );
+
+
+    y += 10;
+
+
+    doc.setFontSize(10);
+
+
+    if (
+        matchingSentences.length === 0
+    ) {
+
+        doc.setFont(
+            "helvetica",
+            "normal"
+        );
+
+        doc.text(
+            "No significant matching sentences found.",
+            20,
+            y
+        );
+
+        y += 10;
+
+    } else {
+
+        matchingSentences.forEach(
+            (item, index) => {
+
+                if (
+                    y > 250
+                ) {
+
+                    doc.addPage();
+
+                    y = 20;
+
+                }
+
+
+                doc.setFont(
+                    "helvetica",
+                    "bold"
+                );
+
+
+                doc.text(
+                    "Match " +
+                    (index + 1),
+                    15,
+                    y
+                );
+
+
+                y += 7;
+
+
+                doc.setFont(
+                    "helvetica",
+                    "bold"
+                );
+
+
+                doc.text(
+                    "Original:",
+                    20,
+                    y
+                );
+
+
+                y += 5;
+
+
+                doc.setFont(
+                    "helvetica",
+                    "normal"
+                );
+
+
+                const originalLines =
+                    doc.splitTextToSize(
+                        item.original,
+                        165
+                    );
+
+
+                doc.text(
+                    originalLines,
+                    25,
+                    y
+                );
+
+
+                y +=
+                    originalLines.length * 5
+                    + 5;
+
+
+                doc.setFont(
+                    "helvetica",
+                    "bold"
+                );
+
+
+                doc.text(
+                    "Matched:",
+                    20,
+                    y
+                );
+
+
+                y += 5;
+
+
+                doc.setFont(
+                    "helvetica",
+                    "normal"
+                );
+
+
+                const matchedLines =
+                    doc.splitTextToSize(
+                        item.matched,
+                        165
+                    );
+
+
+                doc.text(
+                    matchedLines,
+                    25,
+                    y
+                );
+
+
+                y +=
+                    matchedLines.length * 5
+                    + 5;
+
+
+                doc.setFont(
+                    "helvetica",
+                    "bold"
+                );
+
+
+                doc.text(
+                    "Sentence Similarity: " +
+                    item.score.toFixed(1) +
+                    "%",
+                    25,
+                    y
+                );
+
+
+                y += 10;
+
+
+                doc.setDrawColor(
+                    210,
+                    210,
+                    210
+                );
+
+
+                doc.line(
+                    20,
+                    y,
+                    190,
+                    y
+                );
+
+
+                y += 8;
+
+            }
+        );
+
+    }
+
+
+
+    // ------------------------------------------------------
+    // ORIGINAL DOCUMENT
+    // ------------------------------------------------------
+
+    if (
+        y > 250
+    ) {
+
+        doc.addPage();
+
+        y = 20;
+
+    }
+
+
+    doc.setFontSize(13);
+
+    doc.setFont(
+        "helvetica",
+        "bold"
+    );
+
+
+    doc.text(
+        "Original Document Text",
+        15,
+        y
+    );
+
+
+    y += 10;
+
+
+    doc.setFontSize(10);
+
+    doc.setFont(
+        "helvetica",
+        "normal"
+    );
+
+
+    const originalLines =
+        doc.splitTextToSize(
+            originalText ||
+                "No text available.",
+            175
+        );
+
+
+    originalLines.forEach(
+        line => {
+
+            if (
+                y > 275
+            ) {
+
+                doc.addPage();
+
+                y = 20;
+
+            }
+
+
+            doc.text(
+                line,
+                15,
+                y
+            );
+
+
+            y += 5;
+
+        }
+    );
+
+
+
+    // ------------------------------------------------------
+    // PAGE NUMBERS
+    // ------------------------------------------------------
+
+    addPDFPageNumber(
+        doc
+    );
+
+
+    // ------------------------------------------------------
+    // SAVE
+    // ------------------------------------------------------
+
+    doc.save(
+        cleanFileName(
+            report.documentName
+        ) +
+        "_plagiarism_report.pdf"
+    );
+
+}
+
+
+
+// ==========================================================
+// NAVIGATION
+// ==========================================================
+
+function goDashboard() {
+
+    window.location.href =
+        "dashboard.html";
+
+}
+
+
+function checkAnother() {
+
+    window.location.href =
+        "upload.html";
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>
